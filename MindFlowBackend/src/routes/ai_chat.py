@@ -1,8 +1,10 @@
 from flask import Blueprint, request, jsonify
-import openai
+from openai import OpenAI
 import os
 import random
 import time
+import json
+from datetime import datetime
 
 ai_chat_bp = Blueprint('ai_chat', __name__)
 
@@ -27,11 +29,47 @@ FALLBACK_RESPONSES = [
     "Twinkle tip: thora break lo, phir try karo! 🌟"
 ]
 
+def validate_chat_request(data):
+    """Validate chat request data"""
+    if not data:
+        return False, "Request data is required"
+    
+    if not isinstance(data, dict):
+        return False, "Request data must be a JSON object"
+    
+    message = data.get('message', '').strip()
+    if not message:
+        return False, "Message is required and cannot be empty"
+    
+    if len(message) > 1000:
+        return False, "Message too long (max 1000 characters)"
+    
+    # Validate player_name
+    player_name = data.get('player_name', 'Player').strip()
+    if len(player_name) > 50:
+        return False, "Player name too long (max 50 characters)"
+    
+    # Validate level
+    level = data.get('level', 1)
+    try:
+        level = int(level)
+        if level < 1 or level > 100:
+            return False, "Level must be between 1 and 100"
+    except (ValueError, TypeError):
+        return False, "Level must be a valid number"
+    
+    # Validate context
+    context = data.get('context', '').strip()
+    if len(context) > 500:
+        return False, "Context too long (max 500 characters)"
+    
+    return True, None
+
 def get_openai_response(user_message, player_name="Player", level=1, context=""):
     """Get response from OpenAI API"""
     try:
-        # Set the API key
-        openai.api_key = OPENAI_API_KEY
+        # Create OpenAI client
+        client = OpenAI(api_key=OPENAI_API_KEY)
         
         # Create the prompt for Twinkle
         prompt = f"""
@@ -48,7 +86,7 @@ Player ne kaha: "{user_message}"
 Ab Twinkle ke taur pe reply do, sirf Roman Urdu mein. Response choti aur friendly honi chahiye.
 """
         
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": prompt}
@@ -63,8 +101,8 @@ Ab Twinkle ke taur pe reply do, sirf Roman Urdu mein. Response choti aur friendl
         print(f"OpenAI API Error: {e}")
         # Try backup API key
         try:
-            openai.api_key = BACKUP_OPENAI_API_KEY
-            response = openai.ChatCompletion.create(
+            client = OpenAI(api_key=BACKUP_OPENAI_API_KEY)
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": prompt}
@@ -81,15 +119,35 @@ Ab Twinkle ke taur pe reply do, sirf Roman Urdu mein. Response choti aur friendl
 def chat_with_twinkle():
     """Chat endpoint for Twinkle AI companion"""
     try:
-        data = request.get_json()
+        # Check content type
+        if not request.is_json:
+            return jsonify({
+                'error': 'Content-Type must be application/json',
+                'message': 'Please send JSON data'
+            }), 400
         
-        user_message = data.get('message', '')
-        player_name = data.get('player_name', 'Player')
-        level = data.get('level', 1)
-        context = data.get('context', '')
+        # Get and validate request data
+        try:
+            data = request.get_json()
+        except json.JSONDecodeError:
+            return jsonify({
+                'error': 'Invalid JSON format',
+                'message': 'Please check your JSON syntax'
+            }), 400
         
-        if not user_message:
-            return jsonify({'error': 'Message is required'}), 400
+        # Validate input
+        is_valid, error_message = validate_chat_request(data)
+        if not is_valid:
+            return jsonify({
+                'error': 'Validation failed',
+                'message': error_message
+            }), 400
+        
+        # Extract validated data
+        user_message = data.get('message', '').strip()
+        player_name = data.get('player_name', 'Player').strip()
+        level = int(data.get('level', 1))
+        context = data.get('context', '').strip()
         
         # Add artificial delay to simulate thinking
         time.sleep(random.uniform(0.5, 2.0))
@@ -104,49 +162,90 @@ def chat_with_twinkle():
         return jsonify({
             'response': ai_response,
             'timestamp': time.time(),
-            'source': 'ai' if ai_response not in FALLBACK_RESPONSES else 'fallback'
+            'source': 'ai' if ai_response not in FALLBACK_RESPONSES else 'mock_ai',
+            'player_name': player_name,
+            'message_length': len(user_message)
         }), 200
         
     except Exception as e:
+        print(f"Chat endpoint error: {e}")
         # Return fallback response on any error
         return jsonify({
             'response': random.choice(FALLBACK_RESPONSES),
             'timestamp': time.time(),
-            'source': 'fallback',
-            'error': str(e)
+            'source': 'mock_ai',
+            'error': 'An error occurred',
+            'message': 'Please try again later'
         }), 200
 
 @ai_chat_bp.route('/game-hint', methods=['POST'])
 def get_game_hint():
     """Get game-specific hints from Twinkle"""
     try:
-        data = request.get_json()
+        # Check content type
+        if not request.is_json:
+            return jsonify({
+                'error': 'Content-Type must be application/json',
+                'message': 'Please send JSON data'
+            }), 400
         
-        game_type = data.get('game_type')
-        current_state = data.get('current_state', {})
-        player_name = data.get('player_name', 'Player')
+        # Get and validate request data
+        try:
+            data = request.get_json()
+        except json.JSONDecodeError:
+            return jsonify({
+                'error': 'Invalid JSON format',
+                'message': 'Please check your JSON syntax'
+            }), 400
+        
+        if not data:
+            return jsonify({
+                'error': 'Request data is required'
+            }), 400
+        
+        game_type = data.get('game_type', '').strip()
+        if not game_type:
+            return jsonify({
+                'error': 'Game type is required'
+            }), 400
+        
+        # Validate game type
+        valid_game_types = ['memory-cards', 'word-puzzle', 'number-sequence', 'quick-math']
+        if game_type not in valid_game_types:
+            return jsonify({
+                'error': 'Invalid game type',
+                'message': f'Game type must be one of: {", ".join(valid_game_types)}'
+            }), 400
         
         # Game-specific hint logic
         hints = {
             'memory-cards': [
                 "Yaad rakhne ke liye patterns dekho! 🧠",
                 "Corners se start karo, easier hota hai! 💡",
-                "Ek baar mein sirf 2 cards flip karo! 🎯"
+                "Ek baar mein sirf 2 cards flip karo! 🎯",
+                "Visual memory use karo! 👁️",
+                "Take your time, speed se kuch nahi hota! ⏰"
             ],
             'word-puzzle': [
                 "Vowels (A, E, I, O, U) pehle try karo! 📝",
                 "Common letters jaise R, S, T dekho! ✨",
-                "Word ka meaning hint mein hai! 🤔"
+                "Word ka meaning hint mein hai! 🤔",
+                "Prefixes aur suffixes try karo! 🔤",
+                "Context clues use karo! 🔍"
             ],
             'number-sequence': [
                 "Numbers ko groups mein yaad karo! 🔢",
                 "Rhythm banao, jaise music! 🎵",
-                "Visualization use karo! 👁️"
+                "Visualization use karo! 👁️",
+                "Patterns dekho! 📊",
+                "Mathematical relationships find karo! ➗"
             ],
             'quick-math': [
                 "Simple calculations pehle karo! ➕",
                 "Tables yaad rakho! ✖️",
-                "Speed ke saath accuracy bhi important hai! ⚡"
+                "Speed ke saath accuracy bhi important hai! ⚡",
+                "Mental math practice karo! 🧮",
+                "Break down complex problems! 🔢"
             ]
         }
         
@@ -156,24 +255,60 @@ def get_game_hint():
         return jsonify({
             'hint': hint,
             'game_type': game_type,
-            'timestamp': time.time()
+            'timestamp': time.time(),
+            'hint_count': len(game_hints)
         }), 200
         
     except Exception as e:
+        print(f"Game hint endpoint error: {e}")
         return jsonify({
             'hint': "Main tumhare saath hoon! Try again! 🌟",
-            'error': str(e)
+            'game_type': 'general',
+            'timestamp': time.time(),
+            'error': 'An error occurred',
+            'message': 'Please try again later'
         }), 200
 
 @ai_chat_bp.route('/encouragement', methods=['POST'])
 def get_encouragement():
     """Get encouragement messages from Twinkle"""
     try:
-        data = request.get_json()
+        # Check content type
+        if not request.is_json:
+            return jsonify({
+                'error': 'Content-Type must be application/json',
+                'message': 'Please send JSON data'
+            }), 400
         
+        # Get and validate request data
+        try:
+            data = request.get_json()
+        except json.JSONDecodeError:
+            return jsonify({
+                'error': 'Invalid JSON format',
+                'message': 'Please check your JSON syntax'
+            }), 400
+        
+        if not data:
+            return jsonify({
+                'error': 'Request data is required'
+            }), 400
+        
+        # Validate score
         score = data.get('score', 0)
-        game_type = data.get('game_type', '')
-        achievement = data.get('achievement', '')
+        try:
+            score = int(score)
+            if score < 0:
+                return jsonify({
+                    'error': 'Score cannot be negative'
+                }), 400
+        except (ValueError, TypeError):
+            return jsonify({
+                'error': 'Score must be a valid number'
+            }), 400
+        
+        game_type = data.get('game_type', '').strip()
+        achievement = data.get('achievement', '').strip()
         
         encouragements = []
         
@@ -181,34 +316,52 @@ def get_encouragement():
             encouragements.extend([
                 "Wah! Tumhara score toh kamaal ka hai! 🏆",
                 "Pro player ban rahe ho! Main proud hoon! 🌟",
-                "Aise hi continue karo! Tum champion ho! 👑"
+                "Aise hi continue karo! Tum champion ho! 👑",
+                "Incredible performance! Tum genius ho! 🧠"
             ])
         elif score > 20:
             encouragements.extend([
                 "Bohat acha! Score improve ho raha hai! 📈",
                 "Keep it up! Tum kar sakte ho! 💪",
-                "Practice makes perfect! 🎯"
+                "Practice makes perfect! 🎯",
+                "Getting better every time! 🚀"
             ])
         else:
             encouragements.extend([
                 "Koi baat nahi! Start toh acha hai! 🌱",
                 "Har expert bhi beginner tha! 🚀",
-                "Try again! Main tumhare saath hoon! 💫"
+                "Try again! Main tumhare saath hoon! 💫",
+                "Don't give up! Success is around the corner! 🌈"
             ])
         
         if achievement:
             encouragements.append(f"Congratulations on {achievement}! 🎉")
         
-        message = random.choice(encouragements)
+        if game_type:
+            game_encouragements = {
+                'memory-cards': "Memory games mein tumhara dimagh sharp ho raha hai! 🧠",
+                'word-puzzle': "Vocabulary improve ho rahi hai! 📚",
+                'number-sequence': "Mathematical thinking develop ho rahi hai! 🔢",
+                'quick-math': "Mental math skills boost ho rahe hain! ⚡"
+            }
+            if game_type in game_encouragements:
+                encouragements.append(game_encouragements[game_type])
+        
+        encouragement = random.choice(encouragements)
         
         return jsonify({
-            'message': message,
+            'encouragement': encouragement,
+            'score': score,
+            'game_type': game_type,
             'timestamp': time.time()
         }), 200
         
     except Exception as e:
+        print(f"Encouragement endpoint error: {e}")
         return jsonify({
-            'message': "Tum bohot acha kar rahe ho! 🌟",
-            'error': str(e)
+            'encouragement': "Main tumhare saath hoon! Keep going! 💪",
+            'timestamp': time.time(),
+            'error': 'An error occurred',
+            'message': 'Please try again later'
         }), 200
 

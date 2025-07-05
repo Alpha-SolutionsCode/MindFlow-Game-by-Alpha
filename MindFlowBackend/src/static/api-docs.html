@@ -13,9 +13,10 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 50%, #4c1d95 100%);
             min-height: 100vh;
             color: #333;
+            overflow-x: hidden;
         }
 
         .container {
@@ -34,68 +35,89 @@
             font-size: 3rem;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .header p {
             font-size: 1.2rem;
             opacity: 0.9;
+            color: #e0e7ff;
         }
 
         .api-section {
-            background: white;
-            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
         }
 
         .api-section:hover {
             transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
 
         .section-title {
-            color: #667eea;
+            color: #fbbf24;
             font-size: 2rem;
             margin-bottom: 20px;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid #fbbf24;
             padding-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
 
         .endpoint {
-            background: #f8f9fa;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
-            border-left: 5px solid #667eea;
+            border-left: 5px solid #fbbf24;
+            transition: all 0.3s ease;
+        }
+
+        .endpoint:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
         }
 
         .method {
             display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
+            padding: 8px 16px;
+            border-radius: 25px;
             font-weight: bold;
             font-size: 0.9rem;
             margin-right: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        .method.get { background: #28a745; color: white; }
-        .method.post { background: #007bff; color: white; }
-        .method.put { background: #ffc107; color: black; }
-        .method.delete { background: #dc3545; color: white; }
+        .method.get { background: linear-gradient(45deg, #10b981, #059669); color: white; }
+        .method.post { background: linear-gradient(45deg, #3b82f6, #2563eb); color: white; }
+        .method.put { background: linear-gradient(45deg, #f59e0b, #d97706); color: white; }
+        .method.delete { background: linear-gradient(45deg, #ef4444, #dc2626); color: white; }
 
         .endpoint-url {
             font-family: 'Courier New', monospace;
-            background: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fbbf24;
+            padding: 12px;
+            border-radius: 8px;
             margin: 10px 0;
             font-size: 1.1rem;
+            border: 1px solid rgba(251, 191, 36, 0.3);
         }
 
         .description {
             margin: 15px 0;
             line-height: 1.6;
+            color: #e0e7ff;
         }
 
         .params {
@@ -103,49 +125,51 @@
         }
 
         .param {
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 5px 0;
-            border: 1px solid #dee2e6;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .param-name {
             font-weight: bold;
-            color: #667eea;
+            color: #fbbf24;
         }
 
         .param-type {
-            color: #6c757d;
+            color: #cbd5e1;
             font-size: 0.9rem;
         }
 
         .response-example {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 8px;
             padding: 15px;
             margin: 15px 0;
             font-family: 'Courier New', monospace;
             font-size: 0.9rem;
             overflow-x: auto;
+            color: #fbbf24;
         }
 
         .status-badge {
             display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
+            padding: 4px 10px;
+            border-radius: 15px;
             font-size: 0.8rem;
             font-weight: bold;
             margin-left: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        .status-200 { background: #d4edda; color: #155724; }
-        .status-201 { background: #d1ecf1; color: #0c5460; }
-        .status-400 { background: #f8d7da; color: #721c24; }
-        .status-404 { background: #fff3cd; color: #856404; }
-        .status-429 { background: #f8d7da; color: #721c24; }
-        .status-500 { background: #f8d7da; color: #721c24; }
+        .status-200 { background: linear-gradient(45deg, #10b981, #059669); color: white; }
+        .status-201 { background: linear-gradient(45deg, #06b6d4, #0891b2); color: white; }
+        .status-400 { background: linear-gradient(45deg, #f59e0b, #d97706); color: white; }
+        .status-404 { background: linear-gradient(45deg, #8b5cf6, #7c3aed); color: white; }
+        .status-429 { background: linear-gradient(45deg, #ef4444, #dc2626); color: white; }
+        .status-500 { background: linear-gradient(45deg, #dc2626, #b91c1c); color: white; }
 
         .features {
             display: grid;
@@ -155,46 +179,81 @@
         }
 
         .feature-card {
-            background: white;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 25px;
-            border-radius: 15px;
+            border-radius: 20px;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            color: white;
         }
 
         .feature-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .feature-icon {
             font-size: 3rem;
             margin-bottom: 15px;
+            color: #fbbf24;
         }
 
         .feature-title {
-            color: #667eea;
+            color: #fbbf24;
             font-size: 1.3rem;
             margin-bottom: 10px;
+            font-weight: bold;
         }
 
         .mobile-optimized {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #1e1b4b;
+            padding: 25px;
+            border-radius: 20px;
             margin: 30px 0;
             text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         .mobile-optimized h3 {
             font-size: 1.5rem;
             margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-button {
+            background: linear-gradient(45deg, #fbbf24, #f59e0b);
+            color: #1e1b4b;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #f59e0b, #d97706);
         }
 
         @media (max-width: 768px) {
             .container {
-                padding: 10px;
+                padding: 15px;
             }
             
             .header h1 {
@@ -208,6 +267,34 @@
             .section-title {
                 font-size: 1.5rem;
             }
+            
+            .nav-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-button {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #fbbf24, #f59e0b);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #f59e0b, #d97706);
         }
     </style>
 </head>
@@ -216,6 +303,12 @@
         <div class="header">
             <h1>🧠 MindFlow API</h1>
             <p>Your Roman Urdu AI Companion Backend</p>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="/" class="nav-button">🏠 Home</a>
+            <a href="/admin" class="nav-button">⚙️ Admin Dashboard</a>
+            <a href="/health" class="nav-button">💚 Health Check</a>
         </div>
 
         <div class="mobile-optimized">
@@ -260,6 +353,14 @@
                         <span class="param-name">player_name</span> <span class="param-type">(string, optional)</span>
                         <br>Your name for personalized responses
                     </div>
+                    <div class="param">
+                        <span class="param-name">level</span> <span class="param-type">(integer, optional)</span>
+                        <br>Game level (default: 1)
+                    </div>
+                    <div class="param">
+                        <span class="param-name">context</span> <span class="param-type">(string, optional)</span>
+                        <br>Additional context for the conversation
+                    </div>
                 </div>
                 <div class="response-example">
 {
@@ -284,6 +385,10 @@
                         <span class="param-name">game_type</span> <span class="param-type">(string, required)</span>
                         <br>Type of game (memory-cards, word-puzzle, number-sequence, quick-math)
                     </div>
+                    <div class="param">
+                        <span class="param-name">level</span> <span class="param-type">(integer, optional)</span>
+                        <br>Game level (default: 1)
+                    </div>
                 </div>
                 <div class="response-example">
 {
@@ -301,28 +406,10 @@
             
             <div class="endpoint">
                 <span class="method post">POST</span>
-                <span class="endpoint-url">/api/game/scores</span>
+                <span class="endpoint-url">/api/game/score</span>
                 <span class="status-badge status-201">201</span>
                 <div class="description">
-                    Save your game score and update leaderboards.
-                </div>
-                <div class="params">
-                    <div class="param">
-                        <span class="param-name">player_name</span> <span class="param-type">(string, required)</span>
-                        <br>Your player name
-                    </div>
-                    <div class="param">
-                        <span class="param-name">game_type</span> <span class="param-type">(string, required)</span>
-                        <br>Type of game played
-                    </div>
-                    <div class="param">
-                        <span class="param-name">score</span> <span class="param-type">(integer, required)</span>
-                        <br>Your game score
-                    </div>
-                    <div class="param">
-                        <span class="param-name">level</span> <span class="param-type">(integer, optional)</span>
-                        <br>Game level (default: 1)
-                    </div>
+                    Submit a game score for leaderboard tracking.
                 </div>
             </div>
 
@@ -332,16 +419,6 @@
                 <span class="status-badge status-200">200</span>
                 <div class="description">
                     Get leaderboard for a specific game type with pagination.
-                </div>
-                <div class="params">
-                    <div class="param">
-                        <span class="param-name">page</span> <span class="param-type">(integer, optional)</span>
-                        <br>Page number (default: 1)
-                    </div>
-                    <div class="param">
-                        <span class="param-name">per_page</span> <span class="param-type">(integer, optional)</span>
-                        <br>Items per page (max: 50, default: 10)
-                    </div>
                 </div>
             </div>
 
@@ -437,7 +514,7 @@
             
             <div class="endpoint">
                 <span class="status-badge status-500">500</span>
-                <div class="description">Internal Server Error - Something went wrong</div>
+                <div class="description">Internal Server Error - Server-side error</div>
             </div>
         </div>
     </div>

@@ -3,7 +3,7 @@ import sys
 # DON'T CHANGE THIS !!!
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from flask import Flask, send_from_directory, request, jsonify
+from flask import Flask, send_from_directory, request, jsonify, session, redirect, url_for
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -330,9 +330,31 @@ def api_docs():
         return "Static folder not configured", 404
     return send_from_directory(app.static_folder, 'api-docs.html')
 
+@app.route('/api/admin/login', methods=['POST'])
+def admin_login():
+    data = request.get_json()
+    pin = data.get('pin')
+    if pin == '12326022':
+        session['admin_authenticated'] = True
+        return jsonify({'success': True, 'message': 'Admin authenticated'}), 200
+    else:
+        session.pop('admin_authenticated', None)
+        return jsonify({'success': False, 'message': 'Invalid PIN'}), 401
+
+@app.route('/api/admin/logout', methods=['POST'])
+def admin_logout():
+    session.pop('admin_authenticated', None)
+    return jsonify({'success': True, 'message': 'Logged out'}), 200
+
 @app.route('/admin')
 def admin_dashboard():
-    """Serve admin dashboard page"""
+    """Serve admin dashboard page (protected by session)"""
+    if not session.get('admin_authenticated'):
+        # Not authenticated, show minimal page (frontend will show PIN prompt)
+        if app.static_folder is None:
+            return "Static folder not configured", 404
+        return send_from_directory(app.static_folder, 'admin.html')
+    # Authenticated, serve admin dashboard
     if app.static_folder is None:
         return "Static folder not configured", 404
     return send_from_directory(app.static_folder, 'admin.html')
