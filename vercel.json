@@ -1,0 +1,30 @@
+{
+ "version": 2,
+ "builds": [
+  {
+   "src": "MindFlowBackend/src/main.py",
+   "use": "@vercel/python"
+  },
+  {
+   "src": "MindFlowWebApp/package.json",
+   "use": "@vercel/static-build",
+   "config": {
+    "distDir": "dist"
+   }
+  }
+ ],
+ "routes": [
+  {
+   "src": "/api/(.*)",
+   "dest": "MindFlowBackend/src/main.py"
+  },
+  {
+   "src": "/(.*)",
+   "dest": "MindFlowWebApp/dist/$1"
+  }
+ ],
+ "env": {
+  "FLASK_ENV": "production",
+  "FLASK_DEBUG": "False"
+ }
+} 
